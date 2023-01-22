@@ -1,9 +1,43 @@
 const getRowColFromField = (field) => {
-  const row = Math.floor((field - 1) / 3)
-  const col = (field - 1) % 3
+  field -= 1
+  const row = Math.floor(field  / 3)
+  const col = field  % 3
 
   return [row, col]
 }
+
+const currentTurnElement = document.getElementById('current-turn')
+const currentPlayerElement = document.getElementById('current-player')
+const fieldBtns = document.querySelectorAll('.field-btn')
+
+const DomController = (() => {
+  const _restartDom = () => {
+    fieldBtns.forEach(btn => btn.textContent = '')
+    currentTurnElement.textContent = '1'
+    currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
+    document.getElementById('restart-btn').remove()
+  }
+
+  const _createRestartBtn = () => {
+    let btn = document.createElement('button')
+    btn.textContent = 'Restart'
+    btn.id = 'restart-btn'
+    btn.addEventListener('click', () => {
+      Board.restart()
+      _restartDom()
+    })
+
+    return btn
+  }
+
+  const showRestartBtn = () => {
+    currentPlayerElement.textContent = currentTurnElement.textContent = ''
+    const gameInfoEl = document.getElementById('game-info')
+    gameInfoEl.appendChild(_createRestartBtn())
+  }
+
+  return { showRestartBtn }
+})()
 
 const Board = (() => {
   let turn = 0
@@ -14,10 +48,14 @@ const Board = (() => {
      [0, 0, 0]
    ] 
 
+  const _isGameOver = () => {
+    return _isTie() || _winner()
+  }
+
   const _isTie = () => {
     if (_winner()) return false
 
-    return !Boolean(board[0].concat(board[1]).concat(board[2]).filter(field => field === 0).length)
+    return !!!(board[0].concat(board[1]).concat(board[2]).filter(field => field === 0).length)
   } 
 
   const _winnerPresentIn = (field1, field2, field3) => {
@@ -44,33 +82,45 @@ const Board = (() => {
       }
     }
   }
+
+  const restart = () => {
+    board = [[0 ,0, 0], [0, 0, 0], [0, 0, 0]]
+    Board.turn = 0
+  }
   
   const play = (player, field, fieldBtn) => {
     const [row, col] = getRowColFromField(field)
 
-    if (board[row][col]) return
+    if (board[row][col] || _isGameOver()) return
 
     board[row][col] = player
 
     fieldBtn.textContent = player.symbol
     Board.turn++
 
+    currentTurnElement.textContent = Board.turn + 1
+    currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
+
     _isTie() && alert('IT IS A TIE!')
-    _winner() &&  alert(`${_winner().name} WINS!`)
+    _winner() && alert(`${_winner().name} WINS!`)
+
+    if (_isGameOver()) DomController.showRestartBtn()
   }
 
-  return { board, turn, play }
+  return { board, turn, play, restart }
 })()
 
 const Player = (name, symbol) => {
   return { name, symbol }
 }
 
-const player1 = Player('p1', 'X')
-const player2 = Player('p2', 'O')
+const player1 = Player(!!!"prompt('Player 1 (X) name: ')" || 'Player 1', 'X')
+const player2 = Player(!!!"prompt('Player 2 (O) name: ')"  || 'Player 2', 'O')
 const currentPlayer = () => Board.turn % 2 == 0 ? player1 : player2
 
-const fieldBtns = document.querySelectorAll('.field-btn')
+currentTurnElement.textContent = Board.turn + 1
+currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
+
 fieldBtns.forEach(btn => {
   btn.addEventListener('click', () => Board.play(currentPlayer(), +btn.dataset.field, btn))
 })

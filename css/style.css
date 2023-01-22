@@ -1,8 +1,25 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding: 12px 0;
+}
+
 [id^="field-"] {
     border: 1px solid white;
     max-width: 150px;
     min-height: 150px;
     flex: 1;
+}
+
+#game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 button {
@@ -27,4 +44,14 @@ button:focus {
 .row-wrapper {
     display: flex;
     justify-content: center;
+}
+
+#restart-btn {
+    border: 2px solid rgb(205, 205, 205);
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+#restart-btn:active {
+    transform: scale(0.98);
 }
