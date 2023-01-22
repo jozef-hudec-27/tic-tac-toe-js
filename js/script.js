@@ -1,20 +1,34 @@
-const getRowColFromField = (field) => {
-  field -= 1
-  const row = Math.floor(field  / 3)
-  const col = field  % 3
-
-  return [row, col]
+const Player = (name, symbol) => {
+  return { name, symbol }
 }
 
-const currentTurnElement = document.getElementById('current-turn')
-const currentPlayerElement = document.getElementById('current-player')
-const fieldBtns = document.querySelectorAll('.field-btn')
+const Game = (() => {
+  const player1 = Player(!!!"prompt('Player 1 (X) name: ')" || 'Player 1', 'X')
+  const player2 = Player(!!!"prompt('Player 2 (O) name: ')"  || 'Player 2', 'O')
 
-const DomController = (() => {
-  const _restartDom = () => {
+  const currentPlayer = () => {
+    return Board.turn % 2 == 0 ? player1 : player2
+  }
+
+  const initialize = () => {
+    Dom.updateGameInfo()
+
+    Dom.fieldBtns.forEach(btn => {
+      btn.addEventListener('click', () => Board.play(currentPlayer(), +btn.dataset.field, btn))
+    })
+  }
+
+  return { currentPlayer, initialize }
+})()
+
+const Dom = (() => {
+  const currentTurnEl = document.getElementById('current-turn')
+  const currentPlayerEl = document.getElementById('current-player')
+  const fieldBtns = document.querySelectorAll('.field-btn')
+
+  const _restart = () => {
     fieldBtns.forEach(btn => btn.textContent = '')
-    currentTurnElement.textContent = '1'
-    currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
+    updateGameInfo()
     document.getElementById('restart-btn').remove()
   }
 
@@ -24,19 +38,24 @@ const DomController = (() => {
     btn.id = 'restart-btn'
     btn.addEventListener('click', () => {
       Board.restart()
-      _restartDom()
+      _restart()
     })
 
     return btn
   }
 
   const showRestartBtn = () => {
-    currentPlayerElement.textContent = currentTurnElement.textContent = ''
+    currentPlayerEl.textContent = currentTurnEl.textContent = ''
     const gameInfoEl = document.getElementById('game-info')
     gameInfoEl.appendChild(_createRestartBtn())
   }
 
-  return { showRestartBtn }
+  const updateGameInfo = () => {
+    currentTurnEl.textContent = Board.turn + 1
+    currentPlayerEl.textContent = `${Game.currentPlayer().name} (${Game.currentPlayer().symbol})`
+  }
+
+  return { showRestartBtn, updateGameInfo, currentTurnEl, currentPlayerEl, fieldBtns }
 })()
 
 const Board = (() => {
@@ -47,6 +66,14 @@ const Board = (() => {
      [0, 0, 0],
      [0, 0, 0]
    ] 
+
+  const _getRowColFromField = (field) => {
+    field -= 1
+    const row = Math.floor(field  / 3)
+    const col = field  % 3
+  
+    return [row, col]
+  }
 
   const _isGameOver = () => {
     return _isTie() || _winner()
@@ -89,7 +116,7 @@ const Board = (() => {
   }
   
   const play = (player, field, fieldBtn) => {
-    const [row, col] = getRowColFromField(field)
+    const [row, col] = _getRowColFromField(field)
 
     if (board[row][col] || _isGameOver()) return
 
@@ -98,29 +125,16 @@ const Board = (() => {
     fieldBtn.textContent = player.symbol
     Board.turn++
 
-    currentTurnElement.textContent = Board.turn + 1
-    currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
+    Dom.currentTurnEl.textContent = Board.turn + 1
+    Dom.currentPlayerEl.textContent = `${Game.currentPlayer().name} (${Game.currentPlayer().symbol})`
 
     _isTie() && alert('IT IS A TIE!')
     _winner() && alert(`${_winner().name} WINS!`)
 
-    if (_isGameOver()) DomController.showRestartBtn()
+    if (_isGameOver()) Dom.showRestartBtn()
   }
 
   return { board, turn, play, restart }
 })()
 
-const Player = (name, symbol) => {
-  return { name, symbol }
-}
-
-const player1 = Player(!!!"prompt('Player 1 (X) name: ')" || 'Player 1', 'X')
-const player2 = Player(!!!"prompt('Player 2 (O) name: ')"  || 'Player 2', 'O')
-const currentPlayer = () => Board.turn % 2 == 0 ? player1 : player2
-
-currentTurnElement.textContent = Board.turn + 1
-currentPlayerElement.textContent = `${currentPlayer().name} (${currentPlayer().symbol})`
-
-fieldBtns.forEach(btn => {
-  btn.addEventListener('click', () => Board.play(currentPlayer(), +btn.dataset.field, btn))
-})
+Game.initialize()
