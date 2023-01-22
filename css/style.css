@@ -1,6 +1,16 @@
+@font-face {
+    font-family: 'reenie_beanieregular';
+    src: url('../fonts/reeniebeanie-regular-webfont.woff2') format('woff2'),
+         url('../fonts/reeniebeanie-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
+    font-family: reenie_beanieregular, sans-serif;
+    font-size: 2rem;
 }
 
 body {
@@ -31,14 +41,20 @@ button {
 }
 
 button:focus {
-    background-color: rgb(191, 191, 191);
+    background-color: rgb(47, 47, 47);
 }
 
 .field-btn {
     width: 100%;
     height: 100%;
-    background-color: rgb(205, 205, 205);
+    background-color: black;
     font-weight: bold;
+    border-radius: 12px;
+    transition: transform 1s;
+}
+
+.field-btn:active {
+    transform: scale(0.95);
 }
 
 .row-wrapper {
@@ -54,4 +70,14 @@ button:focus {
 
 #restart-btn:active {
     transform: scale(0.98);
+}
+
+path {
+    animation: dash 0.5s linear forwards;
+}
+
+@keyframes dash {
+    to {
+      stroke-dashoffset: 0;
+    }
 }
