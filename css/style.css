@@ -40,7 +40,7 @@ button {
     cursor: pointer;
 }
 
-button:focus {
+.field-btn:focus {
     background-color: rgb(47, 47, 47);
 }
 
@@ -63,7 +63,6 @@ button:focus {
 }
 
 #restart-btn {
-    border: 2px solid rgb(205, 205, 205);
     border-radius: 999px;
     padding: 2px 8px;
 }
@@ -72,12 +71,16 @@ button:focus {
     transform: scale(0.98);
 }
 
-path {
+/* path {
     animation: dash 0.5s linear forwards;
-}
+} */
 
 @keyframes dash {
     to {
       stroke-dashoffset: 0;
     }
+}
+
+#end-game-message {
+    text-align: center;
 }

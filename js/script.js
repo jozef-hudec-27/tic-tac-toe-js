@@ -3,8 +3,8 @@ const Player = (name, symbol) => {
 }
 
 const Game = (() => {
-  const player1 = Player(!!!"prompt('Player 1 (X) name: ')" || 'Player 1', 'X')
-  const player2 = Player(!!!"prompt('Player 2 (O) name: ')"  || 'Player 2', 'O')
+  const player1 = Player('Player 1', 'X')
+  const player2 = Player('Player 2', 'O')
 
   const currentPlayer = () => {
     return Board.turn % 2 == 0 ? player1 : player2
@@ -25,6 +25,7 @@ const Dom = (() => {
   const currentTurnEl = document.getElementById('current-turn')
   const currentPlayerEl = document.getElementById('current-player')
   const fieldBtns = document.querySelectorAll('.field-btn')
+  const endGameMsgEl = document.getElementById('end-game-message')
 
   const X_svgIconHtml = `
       <svg width="128" height="128">
@@ -45,6 +46,7 @@ const Dom = (() => {
     fieldBtns.forEach(btn => btn.textContent = '')
     updateGameInfo()
     document.getElementById('restart-btn').remove()
+    endGameMsgEl.textContent = ''
   }
 
   const _createRestartBtn = () => {
@@ -73,14 +75,20 @@ const Dom = (() => {
   const createSvgElFor = (player) => {
     let symbolWrapper = document.createElement('div')
     symbolWrapper.innerHTML = player.symbol === 'X' ? X_svgIconHtml : O_svgIconHtml
-    symbolWrapper.querySelectorAll('path').forEach(path => {
+    symbolWrapper.querySelectorAll('path').forEach((path, i) => {
       path.style.setProperty('stroke-dasharray', path.getTotalLength())
       path.style.setProperty('stroke-dashoffset', path.getTotalLength())
+
+      if (i === 0) {
+          path.innerHTML = `<animate attributeName="stroke-dashoffset" begin="0s" dur="${player.symbol === 'O' ? 0.5 : 0.25}s" to="0" fill="freeze" />`
+      } else {
+        path.innerHTML = '<animate attributeName="stroke-dashoffset" begin="0.25s" dur="0.25s" to="0" fill="freeze" />'
+      }
     })
     return symbolWrapper
   }
 
-  return { showRestartBtn, updateGameInfo, currentTurnEl, currentPlayerEl, fieldBtns, createSvgElFor }
+  return { showRestartBtn, updateGameInfo, currentTurnEl, currentPlayerEl, fieldBtns, createSvgElFor, endGameMsgEl }
 })()
 
 const Board = (() => {
@@ -154,8 +162,8 @@ const Board = (() => {
     Dom.currentTurnEl.textContent = Board.turn + 1
     Dom.currentPlayerEl.textContent = `${Game.currentPlayer().name} (${Game.currentPlayer().symbol})`
 
-    _isTie() && alert('IT IS A TIE!')
-    _winner() && alert(`${_winner().name} WINS!`)
+    _isTie() && (Dom.endGameMsgEl.textContent = "It's a tie!")
+    _winner() && (Dom.endGameMsgEl.textContent = `${_winner().name} wins!`)
 
     if (_isGameOver()) Dom.showRestartBtn()
   }
